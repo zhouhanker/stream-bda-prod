@@ -1,4 +1,5 @@
 import com.stream.core.ConfigUtils;
+import com.stream.core.IPUtils;
 
 /**
  * @Package PACKAGE_NAME.CoreTest
@@ -9,7 +10,7 @@ import com.stream.core.ConfigUtils;
 public class CoreTest {
 
     public static void main(String[] args) {
-        System.err.println(ConfigUtils.getString("mysql.host"));
+        System.err.println(IPUtils.ip2Region("120.235.32.180"));
     }
 
 }
