@@ -29,6 +29,12 @@ public class DbusSyncSqlserverOmsSysData2Kafka {
 
     private static final String KAFKA_BOTSTRAP_SERVERS = ConfigUtils.getString("kafka.bootstrap.servers");
     private static final String OMS_ORDER_INFO_REALTIME_ORIGIN_TOPIC = "realtime_v3_order_info";
+    private static final String MSSQL_HOST = ConfigUtils.getString("mssql.host");
+    private static final int MSSQL_PORT = ConfigUtils.getInt("mssql.port");
+    private static final String MSSQL_USER = ConfigUtils.getString("mssql.username");
+    private static final String MSSQL_PWD = ConfigUtils.getString("mssql.pwd");
+    private static final String MSSQL_DB = ConfigUtils.getString("mssql.realtime_v3.database");
+    private static final String MSSQL_TBL = ConfigUtils.getString("mssql.realtime_v3.order.tbl");
     private static final OutputTag<String> ERROR_PARSE_JSON_DATA_TAG =  new OutputTag<String>("ERROR_PARSE_JSON_DATA_TAG"){};
     private static final String FLINK_UID_VERSION = "_v1";
 
@@ -49,12 +55,12 @@ public class DbusSyncSqlserverOmsSysData2Kafka {
         debeziumProperties.put("snapshot.locking.mode", "none");
         debeziumProperties.put("snapshot.fetch.size", 200);
         DebeziumSourceFunction<String> sqlServerSource = SqlServerSource.<String>builder()
-                .hostname("10.160.60.14")
-                .port(1433)
-                .username("sa")
-                .password("zh1028,./")
-                .database("realtime_v3")
-                .tableList("dbo.oms_order_dtl")
+                .hostname(MSSQL_HOST)
+                .port(MSSQL_PORT)
+                .username(MSSQL_USER)
+                .password(MSSQL_PWD)
+                .database(MSSQL_DB)
+                .tableList(MSSQL_TBL)
                 .startupOptions(StartupOptions.initial())
                 .debeziumProperties(debeziumProperties)
                 .deserializer(new JsonDebeziumDeserializationSchema())
