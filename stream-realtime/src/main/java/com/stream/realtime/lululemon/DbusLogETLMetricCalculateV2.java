@@ -55,9 +55,15 @@ public class DbusLogETLMetricCalculateV2 {
                 .name("singleViewAcc");
 
         // 计算天和历史天的搜索词统计
-        convert2Json.filter(data -> data.has("keywords"))
-                        .flatMap(new FlatMapKeyWordsArrFunc())
-                                .returns(Types.GENERIC(JsonObject.class)).print();
+        SingleOutputStreamOperator<String> searchTopNAccDs = convert2Json.filter(data -> data.has("keywords"))
+                .flatMap(new FlatMapKeyWordsArrFunc())
+                .returns(Types.GENERIC(JsonObject.class))
+                .keyBy(data -> DateTimeUtils.tsToDate(data.get("ts").getAsLong()) + "|" + data.get("keyword").getAsString())
+                .process(new KeyedProcessSearchTOPNFunc())
+                .uid("_day_searchTOPN")
+                .name("day_searchTOPN");
+
+
 
 
         env.execute();
