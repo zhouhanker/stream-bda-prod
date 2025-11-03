@@ -1,6 +1,5 @@
 package com.stream.core;
 
-import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.lionsoul.ip2region.xdb.IPv4;
 import org.lionsoul.ip2region.xdb.LongByteArray;
 import org.lionsoul.ip2region.xdb.Searcher;
@@ -40,7 +39,7 @@ public class IPUtils {
             long start = System.nanoTime();
             String region = getSearcher().search(ip);
             long cost = (System.nanoTime() - start) / 1000;
-             logger.info("IP: {}, Region: {}, Cost: {} µs", ip, region, cost);
+//             logger.info("IP: {}, Region: {}, Cost: {} µs", ip, region, cost);
             return region;
         } catch (Exception e) {
             return "未知";

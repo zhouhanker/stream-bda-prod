@@ -3,9 +3,7 @@ package com.stream.realtime.lululemon;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stream.core.*;
-import com.stream.realtime.lululemon.func.FlatMapKeyWordsArrFunc;
-import com.stream.realtime.lululemon.func.KeyedProcessSearchTOPNFunc;
-import com.stream.realtime.lululemon.func.KeyedProcessSingleViewAccFunc;
+import com.stream.realtime.lululemon.func.*;
 import lombok.SneakyThrows;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.configuration.Configuration;
@@ -47,15 +45,20 @@ public class DbusLogETLMetricCalculateV2 {
                 .uid("_convertJsonObj")
                 .name("convertJsonObj");
 
+        // parse ip
+        SingleOutputStreamOperator<JsonObject> convertIp2JsonDs = convert2Json.map(new MapGisMessage2Region())
+                .uid("_mapIp2Region")
+                .name("mapIp2Region");
+
         // 每个页面的访问量 & 聚合到userid
-        SingleOutputStreamOperator<String> singleViewAccDs = convert2Json
+        SingleOutputStreamOperator<String> singleViewAccDs = convertIp2JsonDs
                 .keyBy(data -> DateTimeUtils.tsToDate(data.get("ts").getAsLong()) + "|" + data.get("log_type").getAsString())
                 .process(new KeyedProcessSingleViewAccFunc())
                 .uid("_singleViewAcc")
                 .name("singleViewAcc");
 
         // 计算天和历史天的搜索词统计
-        SingleOutputStreamOperator<String> searchTopNAccDs = convert2Json.filter(data -> data.has("keywords"))
+        SingleOutputStreamOperator<String> searchTopNAccDs = convertIp2JsonDs.filter(data -> data.has("keywords"))
                 .flatMap(new FlatMapKeyWordsArrFunc())
                 .returns(Types.GENERIC(JsonObject.class))
                 .keyBy(data -> DateTimeUtils.tsToDate(data.get("ts").getAsLong()) + "|" + data.get("keyword").getAsString())
@@ -63,7 +66,11 @@ public class DbusLogETLMetricCalculateV2 {
                 .uid("_day_searchTOPN")
                 .name("day_searchTOPN");
 
-
+        // 计算region 地区热点
+        SingleOutputStreamOperator<JsonObject> computeRegionDs = convertIp2JsonDs.keyBy(data -> DateTimeUtils.tsToDate(data.get("ts").getAsLong()) + "|" + data.get("region").getAsString())
+                .process(new KeyedProcessRegionHeatFunc())
+                .uid("_compute_region")
+                .name("compute_region");
 
 
         env.execute();
