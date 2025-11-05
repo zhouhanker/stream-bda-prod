@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stream.core.*;
 import com.stream.realtime.lululemon.func.*;
+import com.stream.realtime.lululemon.utils.DorisSinkUtils;
 import lombok.SneakyThrows;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.configuration.Configuration;
@@ -24,6 +25,12 @@ public class DbusLogETLMetricCalculateV2 {
 
     private static final String KAFKA_BOTSTRAP_SERVERS = ConfigUtils.getString("kafka.bootstrap.servers");
     private static final String KAFKA_LOG_TOPIC = "realtime_v3_logs";
+    private static final String DORIS_FE_IP = ConfigUtils.getString("doris.fe.ip");
+    private static final String DORIS_TABLE_NAME = ConfigUtils.getString("doris.log.device.table");
+    private static final String DORIS_USERNAME = ConfigUtils.getString("doris.user.name");
+    private static final String DORIS_PASSWORD = ConfigUtils.getString("doris.user.password");
+    private static final int DORIS_BUFFER_COUNT = 2;
+    private static final int DORIS_BUFFER_SIZE = 1024;
 
     @SneakyThrows
     public static void main(String[] args) {
@@ -46,7 +53,7 @@ public class DbusLogETLMetricCalculateV2 {
                 .name("convertJsonObj");
 
         // parse ip
-        SingleOutputStreamOperator<JsonObject> convertIp2JsonDs = convert2Json.map(new MapGisMessage2Region())
+        SingleOutputStreamOperator<JsonObject> convertIp2JsonDs = convert2Json.map(new MapGisMessage2RegionFunc())
                 .uid("_mapIp2Region")
                 .name("mapIp2Region");
 
@@ -71,6 +78,24 @@ public class DbusLogETLMetricCalculateV2 {
                 .process(new KeyedProcessRegionHeatFunc())
                 .uid("_compute_region")
                 .name("compute_region");
+
+
+        SingleOutputStreamOperator<JsonObject> deviceStatsDs = convertIp2JsonDs.keyBy(data -> {
+                    JsonObject dev = data.getAsJsonObject("device");
+                    String os = dev.has("plat") ? dev.get("plat").getAsString().toLowerCase() : "unknown";
+                    String brand = dev.has("brand") ? dev.get("brand").getAsString().toLowerCase() : "unknown";
+                    String platv = dev.has("platv") ? dev.get("platv").getAsString().toLowerCase() : "unk";
+                    return DateTimeUtils.tsToDate(data.get("ts").getAsLong()) + "|" + os + "|" + brand + "|" + platv;
+                }).process(new KeyedProcessDeviceStatsFunc())
+                .uid("_ProcessDeviceStatsFunc")
+                .name("ProcessDeviceStatsFunc");
+
+        deviceStatsDs.map(new MapDevice2DorisColumnFunc())
+        .sinkTo(
+                DorisSinkUtils.buildPrimaryKeyUpdateSink(DORIS_FE_IP,DORIS_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+        );
+
+
 
 
         env.execute();

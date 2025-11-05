@@ -13,7 +13,7 @@ import org.apache.flink.util.Collector;
  */
 public class FlatMapKeyWordsArrFunc extends RichFlatMapFunction<JsonObject,JsonObject> {
     @Override
-    public void flatMap(JsonObject jsonObject, Collector<JsonObject> collector) throws Exception {
+    public void flatMap(JsonObject jsonObject, Collector<JsonObject> collector){
 
         if (jsonObject.has("keywords") && jsonObject.get("keywords").isJsonArray()){
             JsonArray arr = jsonObject.getAsJsonArray("keywords");

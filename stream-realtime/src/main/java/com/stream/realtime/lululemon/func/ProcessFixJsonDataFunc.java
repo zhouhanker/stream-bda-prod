@@ -2,8 +2,6 @@ package com.stream.realtime.lululemon.func;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import lombok.Data;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
@@ -11,15 +9,13 @@ import org.apache.flink.util.OutputTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 /**
  * @Package com.stream.realtime.lululemon.func.ProcessFixJsonData
  * @Author zhou.han
  * @Date 2025/10/24 19:00
  * @description:
  */
-public class ProcessFixJsonData extends ProcessFunction<String, JsonObject> {
+public class ProcessFixJsonDataFunc extends ProcessFunction<String, JsonObject> {
 
     private static final Logger logger = LoggerFactory.getLogger(ProcessFunction.class);
 
@@ -27,7 +23,7 @@ public class ProcessFixJsonData extends ProcessFunction<String, JsonObject> {
     OutputTag<String> ERROR_PARSE_JSON_DATA_TAG;
 
 
-    public ProcessFixJsonData(OutputTag<String> errorParseJsonDataTag) {
+    public ProcessFixJsonDataFunc(OutputTag<String> errorParseJsonDataTag) {
         this.ERROR_PARSE_JSON_DATA_TAG = errorParseJsonDataTag;
     }
 

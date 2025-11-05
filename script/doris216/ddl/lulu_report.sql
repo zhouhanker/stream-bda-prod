@@ -32,4 +32,31 @@ properties (
 
 select *
 from bigdata_realtime_report_v3.report_lululemon_window_gmv_topN
-where ds = '2025-10-29'
+where ds = '2025-10-29';
+
+
+
+-- log device tbl
+CREATE TABLE IF NOT EXISTS bigdata_realtime_report_v3.report_lululemon_day_log_device_info (
+    pt DATE NOT NULL COMMENT '分区日期',
+    os VARCHAR(32) NOT NULL COMMENT '系统平台',
+    brand VARCHAR(64) NOT NULL COMMENT '品牌',
+    platv VARCHAR(64) NOT NULL COMMENT '系统版本',
+    count BIGINT COMMENT '最新统计值',
+    type VARCHAR(32) COMMENT '统计类型',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间'
+    )
+    UNIQUE KEY(pt, os, brand, platv)
+    PARTITION BY RANGE(pt)()
+    DISTRIBUTED BY HASH(pt, os, brand) BUCKETS 8
+    PROPERTIES (
+       "replication_allocation" = "tag.location.default: 1",
+       "enable_unique_key_merge_on_write" = "true",
+       "dynamic_partition.enable" = "true",
+       "dynamic_partition.time_unit" = "DAY",
+       "dynamic_partition.start" = "-30",
+       "dynamic_partition.end" = "30",
+       "dynamic_partition.prefix" = "p",
+       "dynamic_partition.buckets" = "8",
+       "dynamic_partition.create_history_partition" = "true"
+);

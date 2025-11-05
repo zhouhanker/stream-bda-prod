@@ -56,6 +56,10 @@ public class IPUtils {
         }
     }
 
+    public static void main(String[] args) {
+        System.err.println(ip2Region("61.140.193.98"));
+    }
+
 
 
 }

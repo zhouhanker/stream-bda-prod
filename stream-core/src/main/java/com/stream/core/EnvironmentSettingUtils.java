@@ -31,7 +31,7 @@ public final class EnvironmentSettingUtils {
      */
     public static void defaultParameter(StreamExecutionEnvironment env) {
         // 开启 checkpoint 支持在 STREAMING 模式下的 FlinkSink 操作
-        env.enableCheckpointing(10 * 60 * 1000);
+        env.enableCheckpointing(2 * 60 * 1000);
         // 设置状态后端为 RocksDB
         env.setStateBackend(new EmbeddedRocksDBStateBackend());
         CheckpointConfig config = env.getCheckpointConfig();
@@ -40,7 +40,7 @@ public final class EnvironmentSettingUtils {
         // 设置 checkpoint 存储路径
         config.setCheckpointStorage(new FileSystemCheckpointStorage("hdfs://cdh01:8020/flink-point/ck"));
         // 设置 checkpoint 超时时间，默认为10分钟
-        config.setCheckpointTimeout(10 * 60 * 1000);
+        config.setCheckpointTimeout(2 * 60 * 1000);
         // 设定两个 checkpoint 之间的最小时间间隔，防止出现例如状态数据过大导致 checkpoint 执行时间过长，从而导致 checkpoint 积压过多，
         // 最终 Flink 应用密切触发 checkpoint 操作，会占用大量计算资源而影响整个应用的性能
         config.setMinPauseBetweenCheckpoints(500);

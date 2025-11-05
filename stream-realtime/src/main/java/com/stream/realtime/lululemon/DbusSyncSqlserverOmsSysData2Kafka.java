@@ -4,8 +4,8 @@ import com.google.gson.JsonObject;
 import com.stream.core.ConfigUtils;
 import com.stream.core.EnvironmentSettingUtils;
 import com.stream.core.KafkaUtils;
-import com.stream.realtime.lululemon.func.MapMergeJsonData;
-import com.stream.realtime.lululemon.func.ProcessFixJsonData;
+import com.stream.realtime.lululemon.func.MapMergeJsonDataFunc;
+import com.stream.realtime.lululemon.func.ProcessFixJsonDataFunc;
 import com.ververica.cdc.connectors.base.options.StartupOptions;
 import com.ververica.cdc.connectors.sqlserver.SqlServerSource;
 import com.ververica.cdc.debezium.DebeziumSourceFunction;
@@ -69,12 +69,12 @@ public class DbusSyncSqlserverOmsSysData2Kafka {
 
         DataStreamSource<String> dataStreamSource = env.addSource(sqlServerSource, "_transaction_log_source1");
 
-        SingleOutputStreamOperator<JsonObject> fixJsonDs = dataStreamSource.process(new ProcessFixJsonData(ERROR_PARSE_JSON_DATA_TAG))
+        SingleOutputStreamOperator<JsonObject> fixJsonDs = dataStreamSource.process(new ProcessFixJsonDataFunc(ERROR_PARSE_JSON_DATA_TAG))
                 .uid("_processFixJsonAndConvertStr2JsonDs"+FLINK_UID_VERSION)
                 .name("processFixJsonAndConvertStr2JsonDs");
 
 
-        SingleOutputStreamOperator<JsonObject> resultJsonDs = fixJsonDs.map(new MapMergeJsonData())
+        SingleOutputStreamOperator<JsonObject> resultJsonDs = fixJsonDs.map(new MapMergeJsonDataFunc())
                 .uid("_MapMergeJsonData"+FLINK_UID_VERSION)
                 .name("MapMergeJsonData");
 

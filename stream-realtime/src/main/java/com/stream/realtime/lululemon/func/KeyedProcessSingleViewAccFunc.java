@@ -27,7 +27,7 @@ public class KeyedProcessSingleViewAccFunc extends KeyedProcessFunction<String, 
 
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(Configuration parameters){
         ValueStateDescriptor<Long> pvDesc = new ValueStateDescriptor<>("pvState", Types.LONG);
         pvDesc.enableTimeToLive(StateTtlConfig.newBuilder(Time.days(2)).build());
         pvState = getRuntimeContext().getState(pvDesc);

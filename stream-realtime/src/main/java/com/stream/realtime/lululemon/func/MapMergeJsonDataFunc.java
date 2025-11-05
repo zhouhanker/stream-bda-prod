@@ -9,7 +9,7 @@ import org.apache.flink.api.common.functions.RichMapFunction;
  * @Date 2025/10/24 18:26
  * @description:
  */
-public class MapMergeJsonData extends RichMapFunction<JsonObject, JsonObject> {
+public class MapMergeJsonDataFunc extends RichMapFunction<JsonObject, JsonObject> {
 
     @Override
     public JsonObject map(JsonObject data) throws Exception {

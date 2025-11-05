@@ -28,7 +28,7 @@ public class KeyedProcessSearchTOPNFunc extends KeyedProcessFunction<String, Jso
     private transient ValueState<Long> lastTimer;
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(Configuration parameters){
         ValueStateDescriptor<Long> cntDesc = new ValueStateDescriptor<>("searchCnt", Types.LONG);
         cntDesc.enableTimeToLive(StateTtlConfig.newBuilder(Time.days(2)).build());
         countState = getRuntimeContext().getState(cntDesc);
