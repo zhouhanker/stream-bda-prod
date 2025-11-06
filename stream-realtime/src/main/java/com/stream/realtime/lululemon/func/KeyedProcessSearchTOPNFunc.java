@@ -2,6 +2,7 @@ package com.stream.realtime.lululemon.func;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.stream.core.DateTimeUtils;
 import org.apache.flink.api.common.state.*;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -86,7 +87,7 @@ public class KeyedProcessSearchTOPNFunc extends KeyedProcessFunction<String, Jso
 
         String day = ctx.getCurrentKey().split("\\|")[0];
         JsonObject result = new JsonObject();
-        result.addProperty("day", day);
+        result.addProperty("pt", DateTimeUtils.ds2DorisPt(day));
         JsonArray arr = new JsonArray();
         for (Map.Entry<String, Long> e : top10) {
             JsonObject item = new JsonObject();
@@ -94,7 +95,7 @@ public class KeyedProcessSearchTOPNFunc extends KeyedProcessFunction<String, Jso
             item.addProperty("cnt", e.getValue());
             arr.add(item);
         }
-        result.add("top10", arr);
+        result.add("search_item", arr);
         result.addProperty("emit_time", formattedTime);
         out.collect(String.valueOf(result));
     }

@@ -28,6 +28,8 @@ public class DbusLogETLMetricCalculateV2 {
     private static final String DORIS_FE_IP = ConfigUtils.getString("doris.fe.ip");
     private static final String DORIS_LOG_TABLE_NAME = ConfigUtils.getString("doris.log.device.table");
     private static final String DORIS_REGION_TABLE_NAME = ConfigUtils.getString("doris.log.region.table");
+    private static final String DORIS_SEARCH_TABLE_NAME = ConfigUtils.getString("doris.log.search.table");
+    private static final String DORIS_PAGE_TABLE_NAME = ConfigUtils.getString("doris.log.page.table");
     private static final String DORIS_USERNAME = ConfigUtils.getString("doris.user.name");
     private static final String DORIS_PASSWORD = ConfigUtils.getString("doris.user.password");
     private static final int DORIS_BUFFER_COUNT = 2;
@@ -38,7 +40,7 @@ public class DbusLogETLMetricCalculateV2 {
 
         System.setProperty("HADOOP_USER_NAME","root");
         Configuration conf = new Configuration();
-        conf.setString("taskmanager.memory.managed.size", "4g");
+        conf.setString("taskmanager.memory.managed.size", "8g");
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         EnvironmentSettingUtils.defaultParameter(env);
@@ -91,14 +93,23 @@ public class DbusLogETLMetricCalculateV2 {
                 .uid("_ProcessDeviceStatsFunc")
                 .name("ProcessDeviceStatsFunc");
 
+
         deviceStatsDs.map(new MapDevice2DorisColumnFunc())
         .sinkTo(
-                DorisSinkUtils.buildPrimaryKeyUpdateSink(DORIS_FE_IP,DORIS_LOG_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+                DorisSinkUtils.buildDorisPrimaryModelKeyUpdateSink(DORIS_FE_IP,DORIS_LOG_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
         );
 
         computeRegionDs.map(new MapRegionData2DorisColumnFunc())
         .sinkTo(
-                DorisSinkUtils.buildPrimaryKeyUpdateSink(DORIS_FE_IP,DORIS_REGION_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+                DorisSinkUtils.buildDorisPrimaryModelKeyUpdateSink(DORIS_FE_IP,DORIS_REGION_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+        );
+
+        searchTopNAccDs.sinkTo(
+                DorisSinkUtils.buildDorisDuplicateModelSink(DORIS_FE_IP,DORIS_SEARCH_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+        );
+
+        singleViewAccDs.sinkTo(
+                DorisSinkUtils.buildDorisDuplicateModelSink(DORIS_FE_IP,DORIS_PAGE_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
         );
 
 
@@ -114,15 +125,6 @@ public class DbusLogETLMetricCalculateV2 {
         }catch (Exception e){
             return new JsonObject();
         }
-    }
-
-
-    private static String getKeyword(JsonObject obj) {
-        String[] keys = {"keywords", "kw", "q", "word"};
-        for (String k : keys) {
-            if (obj.has(k)) return obj.get(k).getAsString();
-        }
-        return "";
     }
 
 }

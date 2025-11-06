@@ -2,6 +2,7 @@ package com.stream.realtime.lululemon.func;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.stream.core.DateTimeUtils;
 import org.apache.flink.api.common.state.*;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -86,7 +87,7 @@ public class KeyedProcessSingleViewAccFunc extends KeyedProcessFunction<String, 
         String formattedTime = formatter.format(java.time.Instant.now());
 
         JsonObject result = new JsonObject();
-        result.addProperty("day", day);
+        result.addProperty("pt", DateTimeUtils.ds2DorisPt(day));
         result.addProperty("page", page);
         result.addProperty("pv", pv);
         JsonArray arr = new JsonArray();
