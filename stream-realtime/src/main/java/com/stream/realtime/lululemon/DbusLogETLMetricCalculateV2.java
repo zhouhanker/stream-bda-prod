@@ -26,7 +26,8 @@ public class DbusLogETLMetricCalculateV2 {
     private static final String KAFKA_BOTSTRAP_SERVERS = ConfigUtils.getString("kafka.bootstrap.servers");
     private static final String KAFKA_LOG_TOPIC = "realtime_v3_logs";
     private static final String DORIS_FE_IP = ConfigUtils.getString("doris.fe.ip");
-    private static final String DORIS_TABLE_NAME = ConfigUtils.getString("doris.log.device.table");
+    private static final String DORIS_LOG_TABLE_NAME = ConfigUtils.getString("doris.log.device.table");
+    private static final String DORIS_REGION_TABLE_NAME = ConfigUtils.getString("doris.log.region.table");
     private static final String DORIS_USERNAME = ConfigUtils.getString("doris.user.name");
     private static final String DORIS_PASSWORD = ConfigUtils.getString("doris.user.password");
     private static final int DORIS_BUFFER_COUNT = 2;
@@ -92,7 +93,12 @@ public class DbusLogETLMetricCalculateV2 {
 
         deviceStatsDs.map(new MapDevice2DorisColumnFunc())
         .sinkTo(
-                DorisSinkUtils.buildPrimaryKeyUpdateSink(DORIS_FE_IP,DORIS_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+                DorisSinkUtils.buildPrimaryKeyUpdateSink(DORIS_FE_IP,DORIS_LOG_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+        );
+
+        computeRegionDs.map(new MapRegionData2DorisColumnFunc())
+        .sinkTo(
+                DorisSinkUtils.buildPrimaryKeyUpdateSink(DORIS_FE_IP,DORIS_REGION_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
         );
 
 

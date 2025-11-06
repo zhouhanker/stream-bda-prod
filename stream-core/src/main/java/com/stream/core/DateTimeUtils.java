@@ -1,6 +1,7 @@
 package com.stream.core;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -42,5 +43,13 @@ public final class DateTimeUtils {
         Date dt = new Date(timestamp);
         LocalDateTime localDateTime = LocalDateTime.ofInstant(dt.toInstant(), ZoneId.systemDefault());
         return dtf_ds.format(localDateTime);
+    }
+
+    public static String ds2DorisPt(String ds){
+        return LocalDate.parse(ds,dtf_ds).format(dtf);
+    }
+
+    public static void main(String[] args) {
+        System.err.println(ds2DorisPt("20251103"));
     }
 }

@@ -103,7 +103,7 @@ public class KeyedProcessRegionHeatFunc extends KeyedProcessFunction<String, Jso
         String region = keyParts.length >= 2 ? keyParts[1] : "unknown";
 
         JsonObject result = new JsonObject();
-        result.addProperty("date", date);
+        result.addProperty("pt", date);
         result.addProperty("region", region);
         result.addProperty("count", current);
         result.addProperty("timestamp", System.currentTimeMillis());
@@ -114,7 +114,7 @@ public class KeyedProcessRegionHeatFunc extends KeyedProcessFunction<String, Jso
     private JsonObject buildOutput(String date, String region, String province, String city, String district,
                                    Long count, boolean abnormal, String ip, String regionRaw, String type) {
         JsonObject result = new JsonObject();
-        result.addProperty("date", date);
+        result.addProperty("pt", date);
         result.addProperty("region", region);
         result.addProperty("province", province);
         result.addProperty("city", city);

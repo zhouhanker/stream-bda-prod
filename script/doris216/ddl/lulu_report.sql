@@ -60,3 +60,32 @@ CREATE TABLE IF NOT EXISTS bigdata_realtime_report_v3.report_lululemon_day_log_d
        "dynamic_partition.buckets" = "8",
        "dynamic_partition.create_history_partition" = "true"
 );
+
+-- region
+CREATE TABLE IF NOT EXISTS bigdata_realtime_report_v3.report_lululemon_day_region_info (
+    pt DATE NOT NULL COMMENT '分区日期',
+    region VARCHAR(128) NOT NULL COMMENT '省市区组合（省|市|运营商）',
+    province VARCHAR(64) COMMENT '省份',
+    city VARCHAR(64) COMMENT '城市',
+    district VARCHAR(64) COMMENT '区县/运营商',
+    count BIGINT COMMENT '数量',
+    abnormal BOOLEAN COMMENT '是否异常',
+    region_raw VARCHAR(256) COMMENT '原始区域字段',
+    type VARCHAR(32) COMMENT '类型',
+    ip VARCHAR(64) COMMENT 'IP地址',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间'
+)
+UNIQUE KEY(pt, region)
+PARTITION BY RANGE(pt) (PARTITION p_init VALUES LESS THAN ("2020-01-01"))
+DISTRIBUTED BY HASH(pt, region) BUCKETS 8
+PROPERTIES (
+   "replication_allocation" = "tag.location.default: 1",
+   "enable_unique_key_merge_on_write" = "true",
+   "dynamic_partition.enable" = "true",
+   "dynamic_partition.time_unit" = "DAY",
+   "dynamic_partition.start" = "-30",
+   "dynamic_partition.end" = "30",
+   "dynamic_partition.prefix" = "p",
+   "dynamic_partition.buckets" = "8",
+   "dynamic_partition.create_history_partition" = "true"
+);
