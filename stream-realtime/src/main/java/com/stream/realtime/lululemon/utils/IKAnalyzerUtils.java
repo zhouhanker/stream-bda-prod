@@ -20,10 +20,8 @@ public class IKAnalyzerUtils {
         }
 
         List<String> tokens = new ArrayList<>();
-        TokenStream tokenStream = null;
 
-        try {
-            tokenStream = ANALYZER_INSTANCE.tokenStream("content", new StringReader(text));
+        try (TokenStream tokenStream = ANALYZER_INSTANCE.tokenStream("content", new StringReader(text))) {
             CharTermAttribute termAttr = tokenStream.addAttribute(CharTermAttribute.class);
             tokenStream.reset();
 
@@ -37,12 +35,6 @@ public class IKAnalyzerUtils {
             tokenStream.end();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (tokenStream != null) {
-                try {
-                    tokenStream.close();
-                } catch (IOException ignored) {}
-            }
         }
         return tokens;
     }

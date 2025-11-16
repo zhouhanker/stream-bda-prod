@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stream.core.DateTimeUtils;
 import com.stream.realtime.lululemon.service.TextAnalyzeService;
+import com.stream.realtime.lululemon.utils.SensitiveWordUtils;
 import lombok.SneakyThrows;
 import org.wltea.analyzer.core.IKSegmenter;
 import org.wltea.analyzer.core.Lexeme;
@@ -33,11 +34,13 @@ public class Test {
 //        System.err.println(DateTimeUtils.tsToDate(ts));
 
 
-        String word = "共铲挡 wo 我热爱祖国，这个lulu的衣服真不错，臭狗屎，垃圾 草尼玛 草你妈的 鉴别处男 遥控色子";
-        TextAnalyzeService.AnalyzeResult result = TextAnalyzeService.analyze(word);
+        String word = "共铲挡 wo 我热爱祖国，这个lulu的衣服真不错，臭狗屎，垃圾 草尼玛 草你妈的 鉴别处男 遥控色子,五星红旗迎风飘扬，毛主席的画像屹立在天安门前";
+        TextAnalyzeService.AnalyzeResult p0 = TextAnalyzeService.analyzeP0(word);
+        TextAnalyzeService.AnalyzeResult p1 = TextAnalyzeService.analyzeP1(word);
 
-        System.out.println("分词结果：" + result.tokens);
-        System.out.println("敏感词命中：" + result.sensitiveWords);
+        System.out.println("P0 命中：" + p0.sensitiveWords);
+        System.out.println("P1 命中：" + p1.sensitiveWords);
+
 
 
     }
