@@ -188,6 +188,37 @@
             <version>2.13.2</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.github.magese/ik-analyzer -->
+        <!--        切词-->
+        <dependency>
+            <groupId>com.github.magese</groupId>
+            <artifactId>ik-analyzer</artifactId>
+            <version>8.5.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>8.5.0</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-common</artifactId>
+            <version>8.5.0</version>
+        </dependency>
+
+
+        <!--        冒犯言论-->
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>sensitive-word</artifactId>
+            <version>0.25.0</version>
+        </dependency>
+
 
     </dependencies>
 
@@ -244,6 +275,7 @@
                     <include>**/*.csv</include>
                     <include>**/*.properties</include>
                     <include>**/*.xml</include>
+                    <include>**/*.dic</include>
                 </includes>
                 <!-- 排除标签 -->
                 <excludes>

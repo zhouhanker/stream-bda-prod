@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+
+    <!-- 精准切词模式 -->
+    <entry key="use_smart">true</entry>
+
+    <!-- 扩展词典（你的敏感词词典） -->
+    <!-- 多个词典用 ; 分隔 -->
+    <entry key="ext_dict">
+        sensitiveword_ext.dic;
+    </entry>
+
+    <!-- 停用词典 -->
+    <entry key="ext_stopwords">
+        stopwords.dic;
+        symbols.dic;
+    </entry>
+
+    <!-- 是否保留原始词（可选，推荐 true） -->
+    <entry key="keep_origin_word">true</entry>
+
+</properties>

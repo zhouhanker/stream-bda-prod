@@ -51,23 +51,23 @@ public class DbusLogETLMetricCalculateV2 {
                 "_log_kafka_source_realtime_v3_logs"
         );
 
-        SingleOutputStreamOperator<JsonObject> convert2Json = originKafkaLogDs.map(DbusLogETLMetricCalculateV2::gsonStr2JsonObject)
+        SingleOutputStreamOperator<JsonObject> convert2JsonDs = originKafkaLogDs.map(DbusLogETLMetricCalculateV2::gsonStr2JsonObject)
                 .uid("_convertJsonObj")
                 .name("convertJsonObj");
 
         // parse ip
-        SingleOutputStreamOperator<JsonObject> convertIp2JsonDs = convert2Json.map(new MapGisMessage2RegionFunc())
+        SingleOutputStreamOperator<JsonObject> convertIp2JsonDs = convert2JsonDs.map(new MapGisMessage2RegionFunc())
                 .uid("_mapIp2Region")
                 .name("mapIp2Region");
 
-        // 每个页面的访问量 & 聚合到userid
+        // single view info
         SingleOutputStreamOperator<String> singleViewAccDs = convertIp2JsonDs
                 .keyBy(data -> DateTimeUtils.tsToDate(data.get("ts").getAsLong()) + "|" + data.get("log_type").getAsString())
                 .process(new KeyedProcessSingleViewAccFunc())
                 .uid("_singleViewAcc")
                 .name("singleViewAcc");
 
-        // 计算天和历史天的搜索词统计
+        // search info
         SingleOutputStreamOperator<String> searchTopNAccDs = convertIp2JsonDs.filter(data -> data.has("keywords"))
                 .flatMap(new FlatMapKeyWordsArrFunc())
                 .returns(Types.GENERIC(JsonObject.class))
@@ -76,13 +76,14 @@ public class DbusLogETLMetricCalculateV2 {
                 .uid("_day_searchTOPN")
                 .name("day_searchTOPN");
 
-        // 计算region 地区热点
+        // region heat
         SingleOutputStreamOperator<JsonObject> computeRegionDs = convertIp2JsonDs.keyBy(data -> DateTimeUtils.tsToDate(data.get("ts").getAsLong()) + "|" + data.get("region").getAsString())
                 .process(new KeyedProcessRegionHeatFunc())
                 .uid("_compute_region")
                 .name("compute_region");
 
 
+        // device info
         SingleOutputStreamOperator<JsonObject> deviceStatsDs = convertIp2JsonDs.keyBy(data -> {
                     JsonObject dev = data.getAsJsonObject("device");
                     String os = dev.has("plat") ? dev.get("plat").getAsString().toLowerCase() : "unknown";

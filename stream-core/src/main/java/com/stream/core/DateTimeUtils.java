@@ -49,4 +49,9 @@ public final class DateTimeUtils {
         return LocalDate.parse(ds,dtf_ds).format(dtf);
     }
 
+    public static void main(String[] args) {
+        System.err.println(tsToDate(1761948706L));
+        System.err.println(ds2DorisPt("20251101"));
+    }
+
 }
