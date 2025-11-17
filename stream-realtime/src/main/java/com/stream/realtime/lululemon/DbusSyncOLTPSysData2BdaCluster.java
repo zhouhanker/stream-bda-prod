@@ -26,12 +26,14 @@ import java.util.Properties;
 
 
 /**
- * @Package com.stream.realtime.lululemon.DbusSyncSqlserverOmsSysData2Kafka
+ * @Package com.stream.realtime.lululemon.DbusSyncOLTPSysData2BdaCluster
  * @Author zhou.han
  * @Date 2025/10/24 18:08
  * @description: Flink Task SQLServer Data To Kafka Topic & TASK 01
+ * 1. sqlserver  2 kafka dbo.oms_order_dtl
+ * 2. postgresql 2 hbase spider_db.public.user_info_base
  */
-public class DbusSyncSqlserverOmsSysData2Kafka {
+public class DbusSyncOLTPSysData2BdaCluster {
 
     private static final String KAFKA_BOTSTRAP_SERVERS = ConfigUtils.getString("kafka.bootstrap.servers");
     private static final String OMS_ORDER_INFO_REALTIME_ORIGIN_TOPIC = "realtime_v3_order_info";

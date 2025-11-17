@@ -29,23 +29,21 @@ public class SinkPgCdcData2HbaseFunc extends RichSinkFunction<JsonObject>  imple
 
     private static final Logger logger = LoggerFactory.getLogger(SinkPgCdcData2HbaseFunc.class);
 
-    private  HbaseUtils hbaseUtils;
     private Connection hbaseConn;
-    private String pgHbaseUserInfoTableName = "realtime_v3:dim_user_info_v3";
-    private BufferedMutatorParams bufferedMutator;
 
     BufferedMutator Mutator = null;
 
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        hbaseUtils = new HbaseUtils("cdh01,cdh02,cdh03");
+        HbaseUtils hbaseUtils = new HbaseUtils("cdh01,cdh02,cdh03");
         hbaseConn = hbaseUtils.getConnection();
+        String pgHbaseUserInfoTableName = "realtime_v3:dim_user_info_v3";
         if (!hbaseUtils.tableIsExists(pgHbaseUserInfoTableName)){
             hbaseUtils.createTable("realtime_v3","dim_user_info_v3");
         }
 
-        bufferedMutator = new BufferedMutatorParams(hbaseConn.getTable(TableName.valueOf(pgHbaseUserInfoTableName)).getName()).writeBufferSize(1024);
+        BufferedMutatorParams bufferedMutator = new BufferedMutatorParams(hbaseConn.getTable(TableName.valueOf(pgHbaseUserInfoTableName)).getName()).writeBufferSize(1024);
         Mutator = hbaseConn.getBufferedMutator(bufferedMutator);
     }
 
@@ -83,7 +81,7 @@ public class SinkPgCdcData2HbaseFunc extends RichSinkFunction<JsonObject>  imple
     }
 
     @Override
-    public void initializeState(FunctionInitializationContext functionInitializationContext) throws Exception {
+    public void initializeState(FunctionInitializationContext functionInitializationContext){
 
     }
 }
