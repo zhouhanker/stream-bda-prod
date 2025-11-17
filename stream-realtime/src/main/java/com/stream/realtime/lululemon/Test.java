@@ -35,6 +35,19 @@ public class Test {
 
 
         String word = "共铲挡 wo 我热爱祖国，这个lulu的衣服真不错，臭狗屎，垃圾 草尼玛 草你妈的 鉴别处男 遥控色子,五星红旗迎风飘扬，毛主席的画像屹立在天安门前";
+        /*StringReader stringReader = new StringReader(word);
+        IKSegmenter ikSegmenter = new IKSegmenter(stringReader, true);
+        Lexeme lexeme;
+
+        while ((lexeme = ikSegmenter.next()) != null){
+            System.out.println(lexeme.getLexemeText());
+        }
+
+        System.err.println("=======================================================");
+        for (String s : SensitiveWordHelper.findAll(word)) {
+            System.err.println(s);
+        }*/
+
         TextAnalyzeService.AnalyzeResult p0 = TextAnalyzeService.analyzeP0(word);
         TextAnalyzeService.AnalyzeResult p1 = TextAnalyzeService.analyzeP1(word);
 

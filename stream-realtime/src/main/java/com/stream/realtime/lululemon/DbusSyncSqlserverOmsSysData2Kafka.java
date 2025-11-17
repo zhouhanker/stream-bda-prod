@@ -1,21 +1,27 @@
 package com.stream.realtime.lululemon;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.stream.core.ConfigUtils;
 import com.stream.core.EnvironmentSettingUtils;
 import com.stream.core.KafkaUtils;
 import com.stream.realtime.lululemon.func.MapMergeJsonDataFunc;
 import com.stream.realtime.lululemon.func.ProcessFixJsonDataFunc;
+import com.stream.realtime.lululemon.func.SinkPgCdcData2HbaseFunc;
 import com.ververica.cdc.connectors.base.options.StartupOptions;
+import com.ververica.cdc.connectors.base.source.jdbc.JdbcIncrementalSource;
+import com.ververica.cdc.connectors.postgres.source.PostgresSourceBuilder;
 import com.ververica.cdc.connectors.sqlserver.SqlServerSource;
 import com.ververica.cdc.debezium.DebeziumSourceFunction;
 import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
 import lombok.SneakyThrows;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.OutputTag;
 
+import java.time.Duration;
 import java.util.Properties;
 
 
@@ -66,8 +72,29 @@ public class DbusSyncSqlserverOmsSysData2Kafka {
                 .deserializer(new JsonDebeziumDeserializationSchema())
                 .build();
 
+        JdbcIncrementalSource<String> postgresIncrementalSource =
+                PostgresSourceBuilder.PostgresIncrementalSource.<String>builder()
+                        .hostname("10.160.60.14")
+                        .port(5432)
+                        .database("spider_db")
+                        .schemaList("public")
+                        .tableList("public.user_info_base")
+                        .username("etl_flink_cdc_pub_user")
+                        .password("etl_flink_cdc_pub_user123,./")
+                        .slotName("slot_read_pg_cdc_data_source_flk")
+                        .deserializer(new JsonDebeziumDeserializationSchema())
+                        .decodingPluginName("pgoutput")
+                        .includeSchemaChanges(true)
+                        .startupOptions(StartupOptions.initial())
+                        .build();
+
 
         DataStreamSource<String> dataStreamSource = env.addSource(sqlServerSource, "_transaction_log_source1");
+        DataStreamSource<String> pgCdcDs = env.fromSource(postgresIncrementalSource, WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(5)), "_transaction_pg_cdc");
+
+        SingleOutputStreamOperator<JsonObject> convertPgCdc2JsonDs = pgCdcDs.map(data -> JsonParser.parseString(data).getAsJsonObject())
+                .uid("_convert_pgCdc2json")
+                .name("convert_pgCdc2json");
 
         SingleOutputStreamOperator<JsonObject> fixJsonDs = dataStreamSource.process(new ProcessFixJsonDataFunc(ERROR_PARSE_JSON_DATA_TAG))
                 .uid("_processFixJsonAndConvertStr2JsonDs"+FLINK_UID_VERSION)
@@ -78,11 +105,25 @@ public class DbusSyncSqlserverOmsSysData2Kafka {
                 .uid("_MapMergeJsonData"+FLINK_UID_VERSION)
                 .name("MapMergeJsonData");
 
+        SingleOutputStreamOperator<JsonObject> pGdataDs = convertPgCdc2JsonDs.map(new MapMergeJsonDataFunc())
+                .uid("_MapPgCdcJsonData")
+                .name("MapPgCdcJsonData");
+
+        SingleOutputStreamOperator<JsonObject> resultPgCdcDs = pGdataDs.map(data -> {
+                    data.remove("ts");
+                    return data;
+                })
+                .uid("_MapRemoveTs")
+                .name("MapRemoveTs");
+
+
         fixJsonDs.getSideOutput(ERROR_PARSE_JSON_DATA_TAG).print("ERROR_PARSE_JSON_DATA_TAG: ");
 
         SingleOutputStreamOperator<String> jsonobj2strDs = resultJsonDs.map(JsonObject::toString)
                 .uid("_jsonobj2str" + FLINK_UID_VERSION)
                 .name("jsonobj2str");
+
+        resultPgCdcDs.addSink(new SinkPgCdcData2HbaseFunc());
 
 
         jsonobj2strDs.print("Sink To Kafka Data: -> ");
