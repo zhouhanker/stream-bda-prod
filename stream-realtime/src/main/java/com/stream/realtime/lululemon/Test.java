@@ -56,7 +56,7 @@ public class Test {
         System.out.println("P1 命中：" + p1.sensitiveWords);*/
 
 
-        System.err.println(MD5Hash.getMD5AsHex("26387e18-649c-47d7-a28f-ef5aa728c08f".getBytes()));
+        System.err.println(MD5Hash.getMD5AsHex("ba0f9f0e-4fd9-470d-a034-e33cc1390ec9".getBytes()));
 
 
     }

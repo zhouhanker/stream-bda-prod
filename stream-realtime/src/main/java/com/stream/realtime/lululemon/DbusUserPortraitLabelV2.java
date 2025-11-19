@@ -5,16 +5,20 @@ import com.stream.core.ConfigUtils;
 import com.stream.core.EnvironmentSettingUtils;
 import com.stream.core.KafkaUtils;
 import com.stream.core.WaterMarkUtils;
+import com.stream.realtime.lululemon.func.AsyncHbaseDimUserInfoFunc;
 import com.stream.realtime.lululemon.func.KeyedProcessUserAggMergeFunc;
 import com.stream.realtime.lululemon.func.MapConvertLogOriginAndGetDsTimeFunc;
 import lombok.SneakyThrows;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.streaming.api.datastream.AsyncDataStream;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Package com.stream.realtime.lululemon.DbusUserPortraitLabelV2
@@ -47,13 +51,24 @@ public class DbusUserPortraitLabelV2 {
                 .uid("_convertKafkaOrigin2JsonDs")
                 .name("convertKafkaOrigin2JsonDs");
 
-        SingleOutputStreamOperator<JsonObject> keyedUserAggDs = resultLogDs.filter(data -> data.has("user_id") && data.has("ds"))
+        // {"user_id":"ba0f9f0e-4fd9-470d-a034-e33cc1390ec9","ds":"20251119","login_time":["2025-11-19 10:23:35","2025-11-19 10:23:34","2025-11-19 10:23:33"],"device_info":[{"brand":"iphone","plat":"iphone","platv":"17.6.1","softv":"7.36.0","device":"iphone14_3"},{"brand":"huawei","plat":"android","platv":"10","softv":"7.84.0","device":"glk-al00"}],"search_info":["运动头带","瑜伽裤","斜挎包","运动套装","休闲衫","羽绒","瑜伽服","冬装","发圈"],"gis":[{"ip":"112.49.191.247"},{"ip":"117.154.192.144"}]}
+        SingleOutputStreamOperator<JsonObject> keyedUserLogsAggDs = resultLogDs.filter(data -> data.has("user_id") && data.has("ds"))
                 .keyBy(data -> data.get("key_column").getAsString())
                 .process(new KeyedProcessUserAggMergeFunc())
                 .uid("_KeyedProcessUserAggMergeFunc")
                 .name("KeyedProcessUserAggMergeFunc");
 
 
+        SingleOutputStreamOperator<JsonObject> asyncHbaseUserInfoDs = AsyncDataStream.unorderedWait(
+                        keyedUserLogsAggDs,
+                        new AsyncHbaseDimUserInfoFunc(),
+                        60,
+                        TimeUnit.MINUTES,
+                        500
+                ).uid("_supHbaseDimUserInfoAsync")
+                .name("supHbaseDimUserInfoAsync");
+
+        asyncHbaseUserInfoDs.print();
 
 
         env.execute();
