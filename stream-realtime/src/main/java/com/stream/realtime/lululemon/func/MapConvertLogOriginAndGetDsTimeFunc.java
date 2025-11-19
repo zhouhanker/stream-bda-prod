@@ -15,6 +15,8 @@ public class MapConvertLogOriginAndGetDsTimeFunc implements MapFunction<String, 
     @Override
     public JsonObject map(String value) throws Exception {
         JsonObject valueJson = JsonParser.parseString(value).getAsJsonObject();
+        valueJson.getAsJsonObject("device").remove("uname");
+        valueJson.getAsJsonObject("device").remove("userkey");
         long ts = valueJson.get("ts").getAsLong();
         String userId = valueJson.get("user_id").getAsString();
         String ds = DateTimeUtils.tsToDate(ts);

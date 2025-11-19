@@ -5,8 +5,8 @@ import com.stream.core.ConfigUtils;
 import com.stream.core.EnvironmentSettingUtils;
 import com.stream.core.KafkaUtils;
 import com.stream.core.WaterMarkUtils;
+import com.stream.realtime.lululemon.func.KeyedProcessUserAggMergeFunc;
 import com.stream.realtime.lululemon.func.MapConvertLogOriginAndGetDsTimeFunc;
-import com.stream.realtime.lululemon.func.keyedProcessMargeFunc;
 import lombok.SneakyThrows;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
@@ -42,14 +42,18 @@ public class DbusUserPortraitLabelV2 {
                 "_log_kafka_source_realtime_v3_logs"
         );
 
-        // lambda 表达式  或者叫做链式调用
+        // {"log_id":"9abfcfa78c4f48a9adf7d20e833cbf94","device":{"brand":"honor","plat":"android","platv":"13","softv":"7.84.0","uname":"","userkey":"4eabe9a6f25a4070","device":"any-an00"},"gis":{"ip":"60.233.17.89"},"network":{"net":"wifi"},"opa":"adinfo","log_type":"search","ts":1763213217186.531,"product_id":"10158212569217","order_id":"4fbcc8c583c74fa79bb85cba15224cd1","user_id":"17ece09e-d3c0-4fb4-a510-d9406771e987","keywords":["背心"],"ds":"20251115","key_column":"17ece09e-d3c0-4fb4-a510-d9406771e987_20251115"}
         SingleOutputStreamOperator<JsonObject> resultLogDs = originKafkaLogDs.map(new MapConvertLogOriginAndGetDsTimeFunc())
                 .uid("_convertKafkaOrigin2JsonDs")
                 .name("convertKafkaOrigin2JsonDs");
 
-        resultLogDs.filter(data -> data.has("user_id") && data.has("ds"))
-                        .keyBy(data -> data.get("key_column").getAsString())
-                                .process(new keyedProcessMargeFunc()).print();
+        SingleOutputStreamOperator<JsonObject> keyedUserAggDs = resultLogDs.filter(data -> data.has("user_id") && data.has("ds"))
+                .keyBy(data -> data.get("key_column").getAsString())
+                .process(new KeyedProcessUserAggMergeFunc())
+                .uid("_KeyedProcessUserAggMergeFunc")
+                .name("KeyedProcessUserAggMergeFunc");
+
+
 
 
         env.execute();

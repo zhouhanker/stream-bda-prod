@@ -7,6 +7,7 @@ import com.stream.core.DateTimeUtils;
 import com.stream.realtime.lululemon.service.TextAnalyzeService;
 import com.stream.realtime.lululemon.utils.SensitiveWordUtils;
 import lombok.SneakyThrows;
+import org.apache.hadoop.hbase.util.MD5Hash;
 import org.wltea.analyzer.core.IKSegmenter;
 import org.wltea.analyzer.core.Lexeme;
 import org.wltea.analyzer.lucene.IKAnalyzer;
@@ -48,12 +49,14 @@ public class Test {
             System.err.println(s);
         }*/
 
-        TextAnalyzeService.AnalyzeResult p0 = TextAnalyzeService.analyzeP0(word);
+        /*TextAnalyzeService.AnalyzeResult p0 = TextAnalyzeService.analyzeP0(word);
         TextAnalyzeService.AnalyzeResult p1 = TextAnalyzeService.analyzeP1(word);
 
         System.out.println("P0 命中：" + p0.sensitiveWords);
-        System.out.println("P1 命中：" + p1.sensitiveWords);
+        System.out.println("P1 命中：" + p1.sensitiveWords);*/
 
+
+        System.err.println(MD5Hash.getMD5AsHex("26387e18-649c-47d7-a28f-ef5aa728c08f".getBytes()));
 
 
     }
