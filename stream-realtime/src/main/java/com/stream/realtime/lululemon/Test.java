@@ -35,7 +35,7 @@ public class Test {
 //        System.err.println(DateTimeUtils.tsToDate(ts));
 
 
-        String word = "共铲挡 wo 我热爱祖国，这个lulu的衣服真不错，臭狗屎，垃圾 草尼玛 草你妈的 鉴别处男 遥控色子,五星红旗迎风飘扬，毛主席的画像屹立在天安门前";
+        String word = "{\\n\\n    \\\"用户评论\\\": \\\"LULulemon的男士运动裤真的烂到家了！穿上去感觉像在狗窝里待了一天！颜色也难看，洗完就掉色，腿型一点都没有改善，还是原来那副土ransparent look。好_ops，我投诉你们！\\\",\\n\\n    \\\"差评\\\": \\\"这款男士运动裤真是给我带来了无尽的困扰！\\\",\\n\\n    \\\"_attack\\\": \\\"LULulemon的男士运动裤质量差得离谱，颜色也很难看，穿上去就像穿着狗屎一样\\\",\\n\\n    \\\"不文明用语\\\": \\\"狗屎一样的颜色！洗完就掉色，腿型一点都没有改善，还是原来那副土ransparent look。好_ops，我投诉你们！\\\"\\n}";
         /*StringReader stringReader = new StringReader(word);
         IKSegmenter ikSegmenter = new IKSegmenter(stringReader, true);
         Lexeme lexeme;
@@ -49,14 +49,14 @@ public class Test {
             System.err.println(s);
         }*/
 
-        /*TextAnalyzeService.AnalyzeResult p0 = TextAnalyzeService.analyzeP0(word);
+        TextAnalyzeService.AnalyzeResult p0 = TextAnalyzeService.analyzeP0(word);
         TextAnalyzeService.AnalyzeResult p1 = TextAnalyzeService.analyzeP1(word);
 
         System.out.println("P0 命中：" + p0.sensitiveWords);
-        System.out.println("P1 命中：" + p1.sensitiveWords);*/
+        System.out.println("P1 命中：" + p1.sensitiveWords);
 
 
-        System.err.println(MD5Hash.getMD5AsHex("ba0f9f0e-4fd9-470d-a034-e33cc1390ec9".getBytes()));
+//        System.err.println(MD5Hash.getMD5AsHex("ba0f9f0e-4fd9-470d-a034-e33cc1390ec9".getBytes()));
 
 
     }

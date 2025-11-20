@@ -37,7 +37,8 @@ public class KeyedProcessUserAggMergeFunc extends KeyedProcessFunction<String, J
     private static final ZoneId ZONE = ZoneId.of("Asia/Shanghai");
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(Configuration parameters) {
+
         StateTtlConfig ttlConfig = StateTtlConfig
                 .newBuilder(Time.days(7))
                 .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
