@@ -107,9 +107,18 @@ public class DbusUserPortraitLabelV2 {
                 .uid("_checkUserCommentSensitiveWord")
                 .name("checkUserCommentSensitiveWord");
 
-        checkUserCommentSenDs.keyBy(data -> data.get("user_id").getAsString() + "_" + data.get("ds").getAsString())
-                        .process(new KeyedProcessSensitiveWordAggFunc())
-                                .print();
+        SingleOutputStreamOperator<JsonObject> userCommentSenAggDs = checkUserCommentSenDs.keyBy(data -> data.get("user_id").getAsString() + "_" + data.get("ds").getAsString())
+                .process(new KeyedProcessSensitiveWordAggFunc())
+                .uid("_processSensitiveWordAggFunc_v1")
+                .name("processSensitiveWordAggFunc_v1");
+
+        SingleOutputStreamOperator<JsonObject> userInfoLabelDs = asyncHbaseUserInfoDs.keyBy(d -> d.get("user_id").getAsString() + "_" + d.get("ds").getAsString())
+                .connect(userCommentSenAggDs.keyBy(d -> d.get("user_id").getAsString() + "_" + d.get("ds").getAsString()))
+                .process(new coProcessUserInfoAndCommentJoinFunc())
+                .uid("_userInfoLabel")
+                .name("userInfoLabel");
+
+        userInfoLabelDs.print("userInfoLabelDs -> ");
 
 
         env.execute();
