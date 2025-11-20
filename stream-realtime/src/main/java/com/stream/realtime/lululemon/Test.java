@@ -4,6 +4,7 @@ import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stream.core.DateTimeUtils;
+import com.stream.core.IPUtils;
 import com.stream.realtime.lululemon.service.TextAnalyzeService;
 import com.stream.realtime.lululemon.utils.SensitiveWordUtils;
 import lombok.SneakyThrows;
@@ -54,6 +55,9 @@ public class Test {
 
         System.out.println("P0 命中：" + p0.sensitiveWords);
         System.out.println("P1 命中：" + p1.sensitiveWords);
+
+        String ip = "180.138.216.149";
+        System.err.println(IPUtils.ip2Region(ip));
 
 
 //        System.err.println(MD5Hash.getMD5AsHex("ba0f9f0e-4fd9-470d-a034-e33cc1390ec9".getBytes()));

@@ -1,11 +1,13 @@
 package com.stream.realtime.lululemon;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.stream.core.ConfigUtils;
 import com.stream.core.EnvironmentSettingUtils;
 import com.stream.core.KafkaUtils;
 import com.stream.core.WaterMarkUtils;
 import com.stream.realtime.lululemon.func.*;
+import com.stream.realtime.lululemon.utils.DorisSinkUtils;
 import com.ververica.cdc.connectors.base.options.StartupOptions;
 import com.ververica.cdc.connectors.sqlserver.SqlServerSource;
 import com.ververica.cdc.debezium.DebeziumSourceFunction;
@@ -39,12 +41,20 @@ public class DbusUserPortraitLabelV2 {
     private static final String MSSQL_DB = ConfigUtils.getString("mssql.realtime_v3.database");
     private static final String MSSQL_TBL = ConfigUtils.getString("mssql.realtime_v3.comment.tbl");
 
+    private static final String DORIS_FE_IP = ConfigUtils.getString("doris.fe.ip");
+    private static final String DORIS_USER_LABEL_TABLE_NAME = ConfigUtils.getString("doris.user.label.table");
+    private static final String DORIS_USERNAME = ConfigUtils.getString("doris.user.name");
+    private static final String DORIS_PASSWORD = ConfigUtils.getString("doris.user.password");
+    private static final int DORIS_BUFFER_COUNT = 2;
+    private static final int DORIS_BUFFER_SIZE = 1024;
+
     @SneakyThrows
     public static void main(String[] args) {
 
         System.setProperty("HADOOP_USER_NAME","root");
         Configuration conf = new Configuration();
         conf.setString("taskmanager.memory.managed.size", "8g");
+        conf.setString("taskmanager.memory.network.max", "1gb");
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         EnvironmentSettingUtils.defaultParameter(env);
@@ -118,7 +128,16 @@ public class DbusUserPortraitLabelV2 {
                 .uid("_userInfoLabel")
                 .name("userInfoLabel");
 
-        userInfoLabelDs.print("userInfoLabelDs -> ");
+        SingleOutputStreamOperator<JsonObject> resultUserInfoLabelDs = userInfoLabelDs.map(new MapFixUserInfoData2DorisFunc())
+                .uid("_mapFixdata2Doris")
+                .name("mapFixdata2Doris");
+
+
+        resultUserInfoLabelDs.print("resultUserInfoLabelDs -> ");
+        resultUserInfoLabelDs.map(JsonElement::toString)
+                .sinkTo(
+                DorisSinkUtils.buildDorisPrimaryModelKeyUpdateSink(DORIS_FE_IP,DORIS_USER_LABEL_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE,true)
+        );
 
 
         env.execute();

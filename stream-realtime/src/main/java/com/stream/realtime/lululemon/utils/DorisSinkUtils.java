@@ -10,23 +10,20 @@ import java.util.Date;
 import java.util.Properties;
 
 /**
- * @Package com.stream.realtime.lululemon.utils
- * @Author zhou.han
- * @Date 2025/11/05
- * @Desc 优化后的 DorisSinkUtils：提取公共配置，支持主键模型和明细模型
+ *  DorisSinkUtils：支持写入前清空表数据
  */
 public class DorisSinkUtils {
 
     /**
      * 构建主键模型 Sink（Unique Key + Merge-on-Write）
+     * @param clearBeforeLoad 是否写入前清空表
      */
     public static DorisSink<String> buildDorisPrimaryModelKeyUpdateSink(
             String feNodes, String tableName, String username, String password,
-            int bufferCount, int bufferSize) {
+            int bufferCount, int bufferSize, boolean clearBeforeLoad) {
 
         Properties props = baseProperties();
-        // 主键模型可能需要 MERGE 或 DELETE 支持，这里可按需打开
-        // props.setProperty("merge_type", "MERGE");
+        applyClearBeforeLoad(props, clearBeforeLoad);
 
         return buildBaseDorisSink(
                 feNodes, tableName, username, password,
@@ -37,13 +34,15 @@ public class DorisSinkUtils {
 
     /**
      * 构建明细模型 Sink（Duplicate Key）
+     * @param clearBeforeLoad 是否写入前清空表
      */
     public static DorisSink<String> buildDorisDuplicateModelSink(
             String feNodes, String tableName, String username, String password,
-            int bufferCount, int bufferSize) {
+            int bufferCount, int bufferSize, boolean clearBeforeLoad) {
 
         Properties props = baseProperties();
-        // 明细模型仅插入，不需要 merge/delete 配置
+        applyClearBeforeLoad(props, clearBeforeLoad);
+
         return buildBaseDorisSink(
                 feNodes, tableName, username, password,
                 bufferCount, bufferSize, props,
@@ -81,6 +80,16 @@ public class DorisSinkUtils {
                 .setDorisExecutionOptions(executionOptions)
                 .setSerializer(new SimpleStringSerializer())
                 .build();
+    }
+
+    /**
+     * 设置是否在写入前清空表
+     */
+    private static void applyClearBeforeLoad(Properties props, boolean clearBeforeLoad) {
+        if (clearBeforeLoad) {
+            props.setProperty("exec_mem_limit", "2147483648");
+            props.setProperty("truncate_table", "true");
+        }
     }
 
     /**

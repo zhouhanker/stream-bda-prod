@@ -113,6 +113,38 @@ PROPERTIES (
 );
 
 
+CREATE TABLE IF NOT EXISTS bigdata_realtime_report_v3.user_portrait_label_v1 (
+    pt DATE NOT NULL COMMENT '分区日期',
+    user_id VARCHAR(128) NOT NULL COMMENT '省市区组合（省|市|运营商）',
+    login_time array<string>,
+    device_info  array<string>,
+    search_info array<string>,
+    user_info json,
+    orders array<string>,
+    sw_p0 array<string>,
+    sw_p1 array<string>,
+    gis array<string>,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间'
+)
+UNIQUE KEY(pt, user_id)
+PARTITION BY RANGE(pt) (
+    PARTITION p_init VALUES LESS THAN ("2020-01-01")
+)
+DISTRIBUTED BY HASH(pt, user_id) BUCKETS 8
+PROPERTIES (
+    "replication_allocation" = "tag.location.default: 1",
+    "enable_unique_key_merge_on_write" = "true",
+    "dynamic_partition.enable" = "true",
+    "dynamic_partition.time_unit" = "DAY",
+    "dynamic_partition.start" = "-30",
+    "dynamic_partition.end" = "30",
+    "dynamic_partition.prefix" = "p",
+    "dynamic_partition.buckets" = "8",
+    "dynamic_partition.create_history_partition" = "true"
+);
+
+
+
 truncate table bigdata_realtime_report_v3.report_lululemon_day_log_search_info;
 select *
 from bigdata_realtime_report_v3.report_lululemon_day_log_search_info;
@@ -129,3 +161,4 @@ from bigdata_realtime_report_v3.report_lululemon_day_log_region_info;
 truncate table bigdata_realtime_report_v3.report_lululemon_day_log_page_info;
 select *
 from bigdata_realtime_report_v3.report_lululemon_day_log_page_info;
+

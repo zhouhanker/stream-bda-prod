@@ -60,6 +60,7 @@ public class IPUtils {
         System.err.println(ip2Region("61.140.193.98"));
         System.err.println(ip2Region("120.32.243.79"));
         System.err.println(ip2Region("1.1.1.1"));
+        System.err.println(ip2Region("110.145.91.187"));
     }
 
 

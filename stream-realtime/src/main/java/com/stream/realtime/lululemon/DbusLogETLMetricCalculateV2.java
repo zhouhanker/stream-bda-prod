@@ -97,20 +97,20 @@ public class DbusLogETLMetricCalculateV2 {
 
         deviceStatsDs.map(new MapDevice2DorisColumnFunc())
         .sinkTo(
-                DorisSinkUtils.buildDorisPrimaryModelKeyUpdateSink(DORIS_FE_IP,DORIS_LOG_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+                DorisSinkUtils.buildDorisPrimaryModelKeyUpdateSink(DORIS_FE_IP,DORIS_LOG_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE,false)
         );
 
         computeRegionDs.map(new MapRegionData2DorisColumnFunc())
         .sinkTo(
-                DorisSinkUtils.buildDorisPrimaryModelKeyUpdateSink(DORIS_FE_IP,DORIS_REGION_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+                DorisSinkUtils.buildDorisPrimaryModelKeyUpdateSink(DORIS_FE_IP,DORIS_REGION_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE,false)
         );
 
         searchTopNAccDs.sinkTo(
-                DorisSinkUtils.buildDorisDuplicateModelSink(DORIS_FE_IP,DORIS_SEARCH_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+                DorisSinkUtils.buildDorisDuplicateModelSink(DORIS_FE_IP,DORIS_SEARCH_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE,false)
         );
 
         singleViewAccDs.sinkTo(
-                DorisSinkUtils.buildDorisDuplicateModelSink(DORIS_FE_IP,DORIS_PAGE_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE)
+                DorisSinkUtils.buildDorisDuplicateModelSink(DORIS_FE_IP,DORIS_PAGE_TABLE_NAME,DORIS_USERNAME,DORIS_PASSWORD,DORIS_BUFFER_COUNT,DORIS_BUFFER_SIZE,false)
         );
 
 
