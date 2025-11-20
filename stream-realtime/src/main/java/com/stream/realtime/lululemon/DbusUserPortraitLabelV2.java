@@ -114,7 +114,7 @@ public class DbusUserPortraitLabelV2 {
 
         SingleOutputStreamOperator<JsonObject> userInfoLabelDs = asyncHbaseUserInfoDs.keyBy(d -> d.get("user_id").getAsString() + "_" + d.get("ds").getAsString())
                 .connect(userCommentSenAggDs.keyBy(d -> d.get("user_id").getAsString() + "_" + d.get("ds").getAsString()))
-                .process(new coProcessUserInfoAndCommentJoinFunc())
+                .process(new CoProcessUserInfoAndCommentJoinFunc())
                 .uid("_userInfoLabel")
                 .name("userInfoLabel");
 
