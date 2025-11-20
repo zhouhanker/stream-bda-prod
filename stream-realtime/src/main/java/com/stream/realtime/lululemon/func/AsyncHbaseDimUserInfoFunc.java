@@ -94,6 +94,7 @@ public class AsyncHbaseDimUserInfoFunc extends RichAsyncFunction<JsonObject, Jso
             dim.addProperty("phone_num", stripOuterQuotes(getStr(result, "phone_num")));
             dim.addProperty("gender", stripOuterQuotes(getStr(result, "gender")));
             dim.addProperty("birthday", stripOuterQuotes(getStr(result, "birthday")));
+            dim.addProperty("address", stripOuterQuotes(getStr(result, "address")));
 
             return dim;
 
@@ -143,6 +144,8 @@ public class AsyncHbaseDimUserInfoFunc extends RichAsyncFunction<JsonObject, Jso
 
         if (dim.has("birthday"))
             target.addProperty("birthday", dim.get("birthday").getAsString());
+        if (dim.has("address"))
+            target.addProperty("address", dim.get("address").getAsString());
     }
 
 
