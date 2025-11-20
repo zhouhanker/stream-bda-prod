@@ -103,7 +103,13 @@ public class DbusUserPortraitLabelV2 {
                 ).uid("_supHbaseDimUserInfoAsync")
                 .name("supHbaseDimUserInfoAsync");
 
-        comment2JsonDs.map(new MapSensitiveWordFunc()).print();
+        SingleOutputStreamOperator<JsonObject> checkUserCommentSenDs = comment2JsonDs.map(new MapSensitiveWordFunc())
+                .uid("_checkUserCommentSensitiveWord")
+                .name("checkUserCommentSensitiveWord");
+
+        checkUserCommentSenDs.keyBy(data -> data.get("user_id").getAsString() + "_" + data.get("ds").getAsString())
+                        .process(new KeyedProcessSensitiveWordAggFunc())
+                                .print();
 
 
         env.execute();
